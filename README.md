@@ -1,70 +1,96 @@
-# Getting Started with Create React App
+# 🤖 Wildcats Agent AI
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+An AI assistant that answers questions about your documents **and** the web. Upload a PDF, ask a question, and get two answers side by side: one grounded in the document (RAG) and one based on live Google search results (MCP tool calling). Supports voice input and spoken answers.
 
-## Available Scripts
+<!-- Demo video: add later -->
 
-In the project directory, you can run:
+## Screenshots
 
-### `npm start`
+| Upload a PDF | Ask Questions |
+|---|---|
+| ![Upload](screenshots/upload.png) | ![Chat](screenshots/chat.png) |
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+| Voice Chat Mode |
+|---|
+| ![Voice](screenshots/voice.png) |
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Features
 
-### `npm test`
+- **PDF upload**: drag and drop a PDF to use as the knowledge source
+- **RAG answers**: answers grounded in the uploaded document, with the model told to say "I don't know" instead of making things up
+- **Web search answers**: an MCP server exposes a `search_web` tool (backed by SerpAPI / Google Search), and the model summarizes the results
+- **Side-by-side comparison** of the document answer and the web answer for every question
+- **Voice chat mode**: speak your question (speech recognition) and hear the answer read aloud (text-to-speech)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## How It Works
 
-### `npm run build`
+**RAG pipeline** (`server/chat.js`)
+1. Load the PDF with LangChain's `PDFLoader`
+2. Split it into 500-character chunks
+3. Embed the chunks with OpenAI embeddings and store them in an in-memory vector store
+4. Retrieve the chunks most relevant to the question
+5. Send the retrieved context + question to the LLM with a custom prompt
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+**MCP web search** (`server/mcp-server.js`, `server/chat-mcp.js`)
+1. The backend starts an MCP server as a child process and connects to it over stdio (connection reused across requests)
+2. It calls the `search_web` tool, which queries Google through SerpAPI
+3. The LLM summarizes the search results into an answer
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Tech Stack
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+| Layer | Technologies |
+|---|---|
+| Frontend | React 18, Ant Design, axios, react-speech-recognition, speak-tts |
+| Backend | Node.js, Express, Multer (file upload) |
+| AI | LangChain, OpenAI (chat + embeddings), Model Context Protocol (MCP) SDK, SerpAPI |
 
-### `npm run eject`
+## Project Structure
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```
+agent-ai/
+├── src/                  # React frontend (port 3000)
+│   └── components/       # PdfUploader, ChatComponent, RenderQA
+└── server/               # Express backend (port 5001)
+    ├── server.js         # /upload and /chat endpoints
+    ├── chat.js           # RAG pipeline
+    ├── chat-mcp.js       # MCP client
+    └── mcp-server.js     # MCP server with the search_web tool
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## API Endpoints
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+| Method | Path | Description |
+|---|---|---|
+| POST | `/upload` | Upload a PDF (multipart form, field `file`) |
+| GET | `/chat?question=...` | Returns `{ ragAnswer, mcpAnswer }` |
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## How to Run Locally
 
-## Learn More
+**Prerequisites:** Node.js 18+, an [OpenAI API key](https://platform.openai.com/), a [SerpAPI key](https://serpapi.com/)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+**1. Install dependencies**
+```bash
+npm install
+cd server
+npm install
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+**2. Add your API keys**
 
-### Code Splitting
+Copy `server/.env.example` to `server/.env` and fill in your keys:
+```
+OPENAI_API_KEY=your-openai-api-key
+SERPAPI_KEY=your-serpapi-key
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+**3. Start frontend and backend together** (from the project root)
+```bash
+npm run dev
+```
+Open http://localhost:3000, upload a PDF, and start asking questions.
 
-### Analyzing the Bundle Size
+> Voice mode uses the browser's Web Speech API and works best in Chrome.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## Author
 
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Huizeyuanyang — [GitHub](https://github.com/Huizeyuanyang)
