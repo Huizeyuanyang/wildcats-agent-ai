@@ -17,7 +17,6 @@ const App = () => {
     setConversation((prev) => [...prev, { question, answer }]);
   };
 
-  // Scroll to the newest message
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [conversation, isLoading]);
@@ -26,7 +25,7 @@ const App = () => {
     <Layout className="app-layout">
       <Header className="app-header">
         <Title level={3} className="app-title">
-          Northwestern Agent AI
+          WildCats Agent AI
         </Title>
       </Header>
 
