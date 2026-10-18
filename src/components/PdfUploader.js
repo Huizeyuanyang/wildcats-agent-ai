@@ -27,6 +27,7 @@ const attributes = {
     name: "file",
     multiple: false,
     accept: ".pdf",
+    maxCount: 1, // only show the current file
     customRequest: async ({file, onSuccess, onError}) => {
         const response = await uploadToBackend(file);
         if (response && response.status === 200) {

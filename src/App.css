@@ -1,0 +1,61 @@
+/* ===== Page layout: header / content / input bar ===== */
+.app-layout {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-layout .app-header {
+  display: flex;
+  align-items: center;
+  background-color: #3c2164;
+}
+
+.app-layout .app-title {
+  color: white;
+  margin: 0;
+}
+
+/* Takes all space between the header and the input bar */
+.app-layout .app-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* lets the conversation area shrink and scroll */
+  background-color: #f5f5f7;
+}
+
+/* ===== PDF upload area ===== */
+.uploader-section {
+  flex-shrink: 0;
+  padding: 16px 10%;
+  background-color: white;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+/* antd renders the upload wrapper as an inline span, which lets the
+   uploaded file name spill out of its container. Make it a block. */
+.uploader-section .ant-upload-wrapper {
+  display: block;
+}
+
+/* ===== Conversation ===== */
+.conversation-section {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 10%;
+}
+
+.app-layout .empty-hint {
+  display: block;
+  text-align: center;
+  margin-top: 40px;
+}
+
+/* ===== Input bar ===== */
+.input-bar {
+  padding: 16px 10%;
+  background-color: white;
+  border-top: 1px solid #e8e8e8;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
+}
