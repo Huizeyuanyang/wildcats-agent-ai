@@ -2,7 +2,8 @@
 
 An AI assistant that answers questions about your documents **and** the web. Upload a PDF, ask a question, and get two answers side by side: one grounded in the document (RAG) and one based on live Google search results (MCP tool calling). Supports voice input and spoken answers.
 
-<!-- Demo video: add later -->
+## Demo
+https://github.com/user-attachments/assets/6c4fdf0f-a213-4954-b3d7-d62d5b4fcd60
 
 ## Screenshots
 
