@@ -5,17 +5,16 @@ import { ChatOpenAI } from "@langchain/openai";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 
-// NOTE: change this default filePath to any of your default file name
 const chat = async (filePath = "./uploads/hbs-lean-startup.pdf", query) => {
   // Get API key from environment
   const apiKey = process.env.OPENAI_API_KEY;
 
-  // step 1:
+  // step 1: load the PDF
   const loader = new PDFLoader(filePath);
 
   const data = await loader.load();
 
-  // step 2:
+  // step 2: split into chunks
   const textSplitter = new RecursiveCharacterTextSplitter({
     chunkSize: 500, //  (in terms of number of characters)
     chunkOverlap: 0,
@@ -23,7 +22,7 @@ const chat = async (filePath = "./uploads/hbs-lean-startup.pdf", query) => {
 
   const splitDocs = await textSplitter.splitDocuments(data);
 
-  // step 3
+  // step 3: embed chunks into a vector store
 
   const embeddings = new OpenAIEmbeddings(apiKey ? { apiKey } : {});
 
@@ -32,13 +31,7 @@ const chat = async (filePath = "./uploads/hbs-lean-startup.pdf", query) => {
     embeddings
   );
 
-  // step 4: retrieval
-
-  // const relevantDocs = await vectorStore.similaritySearch(
-  // "What is task decomposition?"
-  // );
-
-  // step 5: qa w/ customize the prompt
+  // step 4: answer with a custom prompt
   const model = new ChatOpenAI({
     model: "gpt-5",
     ...(apiKey && { apiKey }),

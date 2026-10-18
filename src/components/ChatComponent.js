@@ -22,9 +22,9 @@ const ChatComponent = (props) => {
   const [isRecording, setIsRecording] = useState(false);
   const [speech, setSpeech] = useState();
 
-  // 🔧 用 ref 存最新 transcript，避免闭包问题
+  // Keep the latest transcript in a ref so callbacks don't read a stale value
   const transcriptRef = useRef("");
-  // 🔧 标记是否已经提交过，防止重复
+  // Prevents submitting the same voice question twice
   const submittedRef = useRef(false);
 
   const {
@@ -35,12 +35,11 @@ const ChatComponent = (props) => {
     isMicrophoneAvailable,
   } = useSpeechRecognition();
 
-  // 同步 transcript 到 ref
   useEffect(() => {
     transcriptRef.current = transcript;
   }, [transcript]);
 
-  // 初始化语音合成
+  // Initialize text-to-speech
   useEffect(() => {
     const initialized_speech = new Speech();
     initialized_speech
@@ -52,8 +51,7 @@ const ChatComponent = (props) => {
         voice: "Google US English",
         splitSentences: false,
       })
-      .then((data) => {
-        console.log("Speech is ready", data);
+      .then(() => {
         setSpeech(initialized_speech);
       })
       .catch((e) => {
@@ -61,23 +59,20 @@ const ChatComponent = (props) => {
       });
   }, []);
 
-  // 🔧 核心改动：只在 listening 变 false 且还没提交过时，提交一次
+  // When listening stops, submit the transcript once
   useEffect(() => {
     if (listening) {
-      // 开始录音时重置标记
       submittedRef.current = false;
       return;
     }
 
-    // listening 变 false，且还没提交过，且有内容
     if (!submittedRef.current && transcriptRef.current.trim()) {
       submittedRef.current = true;
       const text = transcriptRef.current.trim();
-      console.log("Submitting once:", text); // 调试用
       onSearch(text);
       setIsRecording(false);
     }
-  }, [listening]); // 🔧 只依赖 listening，不依赖 transcript
+  }, [listening]);
 
   const talk = useCallback((what2say) => {
     if (!speech) return;
@@ -85,10 +80,6 @@ const ChatComponent = (props) => {
       .speak({
         text: what2say,
         queue: false,
-      })
-      .then(() => {
-        console.log("Speech finished");
-        // 🔧 不再自动重听
       })
       .catch((e) => {
         console.error("Speech error:", e);
@@ -106,15 +97,13 @@ const ChatComponent = (props) => {
 
   const recordingClickHandler = () => {
     if (isRecording) {
-      // 🔧 手动停止：先标记已提交，再停监听
-      // 这样 useEffect 里不会重复提交
+      // Manual stop: mark as submitted first so the effect above doesn't submit
       submittedRef.current = true;
       SpeechRecognition.stopListening();
       setIsRecording(false);
       resetTranscript();
       transcriptRef.current = "";
     } else {
-      // 开始录音：重置标记
       submittedRef.current = false;
       transcriptRef.current = "";
       resetTranscript();
@@ -126,7 +115,6 @@ const ChatComponent = (props) => {
   const onSearch = async (question) => {
     if (!question || !question.trim()) return;
 
-    console.log("onSearch called with:", question); // 调试用
     setSearchValue("");
     setIsLoading(true);
 

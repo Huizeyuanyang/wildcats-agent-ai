@@ -26,6 +26,7 @@ const uploadToBackend = async (file) => {
 const attributes = {
     name: "file",
     multiple: false,
+    accept: ".pdf",
     customRequest: async ({file, onSuccess, onError}) => {
         const response = await uploadToBackend(file);
         if (response && response.status === 200) {
@@ -36,17 +37,11 @@ const attributes = {
     },
     onChange(info) {
         const { status } = info.file;
-        if (status !== "uploading") {
-            console.log(info.file, info.fileList);
-        }
         if (status === "done") {
             message.success(`${info.file.name} file uploaded successfully.`);
         } else if (status === "error") {
             message.error(`${info.file.name} file upload failed.`);
         }
-    },
-    onDrop(e) {
-        console.log("Dropped files", e.dataTransfer.files);
     },
 };
 
@@ -57,11 +52,10 @@ const PdfUploader = () => {
                 <InboxOutlined />
             </p>
             <p className="ant-upload-text">
-                Click or drag file to this area to upload
+                Click or drag a PDF here to upload
             </p>
             <p className="ant-upload-hint">
-                Support for a single or bulk upload.
-                Strictly prohibited from uploading company data or other band files.
+                Only PDF files are supported. Uploading a new file replaces the current one.
             </p>
         </Dragger>
     );

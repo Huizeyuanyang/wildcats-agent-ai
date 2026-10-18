@@ -72,9 +72,3 @@ const App = () => {
 };
 
 export default App;
-
-
-
-// we need 
-// npm run dev
-// to start the frontend and backend at the same time
