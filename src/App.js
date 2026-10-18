@@ -37,7 +37,7 @@ const App = () => {
         <div className="conversation-section">
           {conversation.length === 0 && !isLoading && (
             <Text type="secondary" className="empty-hint">
-              Upload a PDF, then ask a question below.
+              You can upload a PDF here
             </Text>
           )}
           <RenderQA conversation={conversation} isLoading={isLoading} />
